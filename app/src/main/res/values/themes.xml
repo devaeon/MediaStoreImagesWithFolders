@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.MediaStoreImagesWithFolders" parent="Base.Theme.MediaStoreImagesWithFolders" />
+
+    <style name="ShapeAppearanceOverlay.App.RoundedCorner" parent="">
+        <item name="cornerSize">10%</item>
+    </style>
 </resources>

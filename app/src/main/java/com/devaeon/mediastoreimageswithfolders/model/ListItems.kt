@@ -24,9 +24,12 @@ data class ListItems(
     /** the full file path to this image item as it is on device storage, can no longer be used to access and display the image at runtime, use imageUri instead */
     var filePath: String = "",
 
-    /** the date when image created */
+    /** date representing the last time this image item was  created */
     var dateCreated: Date = Date(),
 
     /** date representing the last time this image item was modified */
-    var dateModified: Date = Date()
-) : Parcelable
+    var dateModified: Date = Date(),
+
+    val inneListSize: Int = 0
+
+) : Parcelable, AbsListItems(TYPE_GENERAL)

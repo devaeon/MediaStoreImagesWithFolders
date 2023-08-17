@@ -12,7 +12,7 @@ import com.devaeon.mediastoreimageswithfolders.databinding.ItemFilterBinding
 import com.devaeon.mediastoreimageswithfolders.model.FolderListWithData
 import com.devaeon.mediastoreimageswithfolders.model.ListItems
 
-class FilterAdapter(private val callback: (mediaType: String, title: String, images: ArrayList<ListItems>) -> Unit) :
+class FilterAdapter(private val callback: ( images: ArrayList<ListItems>) -> Unit) :
     ListAdapter<FolderListWithData, FilterAdapter.ViewHolder>(getDiffUtilCallBack()) {
 
     private var selectedPosition = -1
@@ -53,7 +53,7 @@ class FilterAdapter(private val callback: (mediaType: String, title: String, ima
                 selectedPosition = layoutPosition
                 notifyItemChanged(copyOfLastCheckedPosition)
                 notifyItemChanged(selectedPosition)
-                callback.invoke("FolderListWithData", currentList[layoutPosition].folderName, currentList[layoutPosition].images)
+                callback.invoke(currentList[layoutPosition].images)
 
             }
         }

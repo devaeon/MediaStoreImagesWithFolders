@@ -112,5 +112,4 @@ class RepositoryImpl(private val context: Context) : Repository {
             return arrayListOf(ListItems(File(filePath), name, size, imageUri, imageId, filePath, dateCreated, dateModified))
         }
     }
-
 }
