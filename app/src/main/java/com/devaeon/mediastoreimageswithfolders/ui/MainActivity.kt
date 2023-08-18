@@ -38,8 +38,6 @@ class MainActivity : AppCompatActivity() {
     private val requestStorage = 1
     private var granted = false
     val consolidatedList = arrayListOf<AbsListItems>()
-    var folderListItems = listOf<FolderListWithData>()
-    private lateinit var listItems: List<ListItems>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -66,14 +64,12 @@ class MainActivity : AppCompatActivity() {
     private fun observeData() {
         //full media images list
         viewModel.mediaImages.onEach {
-            listItems = it
             setupAdapter(it)
         }.launchIn(lifecycleScope)
 
 
         //folder through media store list items
         viewModel.mediaFolders.onEach {
-            folderListItems = it
             filterAdapter.submitList(it)
         }.launchIn(lifecycleScope)
     }

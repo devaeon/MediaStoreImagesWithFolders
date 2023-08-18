@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import com.devaeon.mediastoreimageswithfolders.extensions.queryCursor
 import com.devaeon.mediastoreimageswithfolders.model.FolderListWithData
 import com.devaeon.mediastoreimageswithfolders.model.ListItems
@@ -13,6 +14,7 @@ import java.io.File
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
+private const val TAG = "Repository"
 interface Repository {
     suspend fun getMediaImages(): Flow<ArrayList<ListItems>>
     suspend fun getMediaFolders(): Flow<List<FolderListWithData>>
@@ -21,7 +23,8 @@ interface Repository {
 class RepositoryImpl(private val context: Context) : Repository {
     private val imageUri: Uri = MediaStore.Images.Media.getContentUri("external")
 
-    private val projection get() = arrayOf(
+    private val projection
+        get() = arrayOf(
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.DATA,
             MediaStore.Images.Media.DISPLAY_NAME,
@@ -46,6 +49,7 @@ class RepositoryImpl(private val context: Context) : Repository {
         ) {
             listItems.addAll(addImagesList(it))
         }.apply {
+            Log.i(TAG, "getMediaImages: ${listItems.size}")
             emit(listItems)
         }
 
@@ -62,17 +66,28 @@ class RepositoryImpl(private val context: Context) : Repository {
             orderBy,
             true
         ) {
-            val bucketId: Int = it.getInt(it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID))
-            when {
-                !folderIds.contains(bucketId) -> {
-                    folderIds.add(bucketId)
-                    val folderName: String = it.getString(it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME))
-                    val dataPath: String = it.getString(it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA))
-                    var folderPath = dataPath.substring(0, dataPath.lastIndexOf("$folderName/"))
-                    folderPath = "$folderPath$folderName/"
-                    val images = getFolderImages(bucketId)
-                    imageFolders.addAll(arrayListOf(FolderListWithData(folderPath, folderName, images, images.size, bucketId)))
-                }
+            val bucketId: Int =
+                it.getInt(it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID))
+            if (!folderIds.contains(bucketId)) {
+                folderIds.add(bucketId)
+                val folderName: String =
+                    it.getString(it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME))
+                val dataPath: String =
+                    it.getString(it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA))
+                var folderPath = dataPath.substring(0, dataPath.lastIndexOf("$folderName/"))
+                folderPath = "$folderPath$folderName/"
+                val images = getFolderImages(bucketId)
+                imageFolders.addAll(
+                    arrayListOf(
+                        FolderListWithData(
+                            folderPath,
+                            folderName,
+                            images,
+                            images.size,
+                            bucketId
+                        )
+                    )
+                )
             }
         }.apply {
             emit(imageFolders)
@@ -109,7 +124,18 @@ class RepositoryImpl(private val context: Context) : Repository {
 
             val dateCreated = Date(TimeUnit.SECONDS.toMillis(it.getLong(dateAddedCol)))
             val dateModified = Date(TimeUnit.SECONDS.toMillis(it.getLong(dateModifiedCol)))
-            return arrayListOf(ListItems(File(filePath), name, size, imageUri, imageId, filePath, dateCreated, dateModified))
+            return arrayListOf(
+                ListItems(
+                    File(filePath),
+                    name,
+                    size,
+                    imageUri,
+                    imageId,
+                    filePath,
+                    dateCreated,
+                    dateModified
+                )
+            )
         }
     }
 }
